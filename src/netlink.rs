@@ -175,6 +175,18 @@ impl Netlink {
         self.route_handle(RtCmd::Add, route)
     }
 
+    pub fn route_append(&mut self, route: &Routing) -> Result<()> {
+        self.route_handle(RtCmd::Append, route)
+    }
+
+    pub fn route_replace(&mut self, route: &Routing) -> Result<()> {
+        self.route_handle(RtCmd::Replace, route)
+    }
+
+    pub fn route_del(&mut self, route: &Routing) -> Result<()> {
+        self.route_handle(RtCmd::Delete, route)
+    }
+
     fn route_handle(&mut self, cmd: RtCmd, route: &Routing) -> Result<()> {
         let (proto, flags) = match cmd {
             RtCmd::Add => (
