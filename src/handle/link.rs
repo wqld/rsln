@@ -11,7 +11,7 @@ use crate::{
     },
 };
 
-use super::{sock_handle::SocketHandle, zero_terminated};
+use super::{handle::SocketHandle, zero_terminated};
 
 const IFF_UP: u32 = 0x1;
 
@@ -223,7 +223,7 @@ impl LinkHandle<'_> {
 #[cfg(test)]
 mod tests {
     use crate::{
-        handle::sock_handle,
+        handle::handle,
         test_setup,
         types::link::{Kind, LinkAttrs},
     };
@@ -231,7 +231,7 @@ mod tests {
     #[tokio::test]
     async fn test_link_add_modify_del() {
         test_setup!();
-        let mut handle = sock_handle::SocketHandle::new(libc::NETLINK_ROUTE);
+        let mut handle = handle::SocketHandle::new(libc::NETLINK_ROUTE);
         let mut link_handle = handle.handle_link();
         let mut attr = LinkAttrs::new("foo");
 
@@ -267,7 +267,7 @@ mod tests {
     #[test]
     fn test_link_bridge() {
         test_setup!();
-        let mut handle = sock_handle::SocketHandle::new(libc::NETLINK_ROUTE);
+        let mut handle = handle::SocketHandle::new(libc::NETLINK_ROUTE);
         let mut link_handle = handle.handle_link();
         let attr = LinkAttrs::new("foo");
 
@@ -315,7 +315,7 @@ mod tests {
     #[test]
     fn test_link_veth() {
         test_setup!();
-        let mut handle = sock_handle::SocketHandle::new(libc::NETLINK_ROUTE);
+        let mut handle = handle::SocketHandle::new(libc::NETLINK_ROUTE);
         let mut link_handle = handle.handle_link();
         let mut attr = LinkAttrs::new("foo");
         attr.mtu = 1400;
@@ -370,7 +370,7 @@ mod tests {
     #[test]
     fn test_link_get() {
         test_setup!();
-        let mut handle = sock_handle::SocketHandle::new(libc::NETLINK_ROUTE);
+        let mut handle = handle::SocketHandle::new(libc::NETLINK_ROUTE);
         let mut link_handle = handle.handle_link();
         let attr = LinkAttrs::new("lo");
 
@@ -383,7 +383,7 @@ mod tests {
     #[test]
     fn test_link_list() {
         test_setup!();
-        let mut handle = sock_handle::SocketHandle::new(libc::NETLINK_ROUTE);
+        let mut handle = handle::SocketHandle::new(libc::NETLINK_ROUTE);
         let mut link_handle = handle.handle_link();
 
         let links = link_handle.list().unwrap();

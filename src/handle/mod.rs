@@ -1,9 +1,10 @@
 pub mod addr;
 pub mod generic;
+pub mod handle;
 pub mod link;
 pub mod neigh;
 pub mod routing;
-pub mod sock_handle;
+pub mod sock_diag;
 
 #[macro_export]
 macro_rules! test_setup {

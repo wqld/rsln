@@ -4,13 +4,14 @@ use anyhow::Result;
 use sysctl::Sysctl;
 
 use crate::{
-    handle::sock_handle::SocketHandle,
+    handle::{handle::SocketHandle, sock_diag::DiagFamily},
     types::{
         addr::{AddrCmd, AddrFamily, Address},
         generic::{GenlFamilies, GenlFamily},
         link::{Link, LinkAttrs},
         neigh::Neighbor,
         routing::{Routing, RtCmd},
+        sock_diag::{InetDiagTcpResp, InetDiagUdpResp},
     },
 };
 
@@ -238,6 +239,22 @@ impl Netlink {
             .handle_generic()
             .get_family(name)
     }
+
+    pub fn tcp_diagnostics(&mut self, family: DiagFamily) -> Result<Vec<InetDiagTcpResp>> {
+        self.sockets
+            .entry(libc::NETLINK_INET_DIAG)
+            .or_insert(SocketHandle::new(libc::NETLINK_INET_DIAG))
+            .handle_sock_diag()
+            .tcp_info(family)
+    }
+
+    pub fn udp_diagnostics(&mut self, family: DiagFamily) -> Result<Vec<InetDiagUdpResp>> {
+        self.sockets
+            .entry(libc::NETLINK_INET_DIAG)
+            .or_insert(SocketHandle::new(libc::NETLINK_INET_DIAG))
+            .handle_sock_diag()
+            .udp_info(family)
+    }
 }
 
 #[cfg(test)]
@@ -298,5 +315,14 @@ mod tests {
 
         assert!(!links.is_empty());
         assert!(links.iter().any(|link| link.attrs().name == "lo"));
+    }
+
+    #[test]
+    fn test_tcp_diagnostics() {
+        let mut netlink = Netlink::new();
+        let tcpv4_diags = netlink.tcp_diagnostics(DiagFamily::V4).unwrap();
+
+        assert!(!tcpv4_diags.is_empty());
+        assert_eq!(tcpv4_diags[0].msg.family, DiagFamily::V4 as u8);
     }
 }

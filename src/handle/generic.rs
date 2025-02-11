@@ -11,7 +11,7 @@ use crate::{
     },
 };
 
-use super::sock_handle::SocketHandle;
+use super::handle::SocketHandle;
 
 pub struct GenericHandle<'a> {
     pub socket: &'a mut SocketHandle,

@@ -15,7 +15,7 @@ use crate::{
     RTA_MTU, RTA_VIA,
 };
 
-use super::sock_handle::SocketHandle;
+use super::handle::SocketHandle;
 
 const RTM_F_LOOKUP_TABLE: u32 = 0x1000;
 

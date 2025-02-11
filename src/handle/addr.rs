@@ -15,7 +15,7 @@ use crate::{
     },
 };
 
-use super::{sock_handle::SocketHandle, zero_terminated};
+use super::{handle::SocketHandle, zero_terminated};
 
 pub struct AddrHandle<'a> {
     pub socket: &'a mut SocketHandle,

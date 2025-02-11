@@ -4,7 +4,7 @@ use crate::core::{message::Message, socket::Socket};
 
 use super::{
     addr::AddrHandle, generic::GenericHandle, link::LinkHandle, neigh::NeighHandle,
-    routing::RouteHandle,
+    routing::RouteHandle, sock_diag::SockDiagHandle,
 };
 
 const PID_KERNEL: u32 = 0;
@@ -49,6 +49,10 @@ impl SocketHandle {
 
     pub fn handle_generic(&mut self) -> GenericHandle<'_> {
         GenericHandle::from(self)
+    }
+
+    pub fn handle_sock_diag(&mut self) -> SockDiagHandle<'_> {
+        SockDiagHandle::from(self)
     }
 
     pub fn request(&mut self, msg: &mut Message, res_type: u16) -> Result<Vec<Vec<u8>>> {
