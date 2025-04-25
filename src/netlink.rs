@@ -134,6 +134,14 @@ impl Netlink {
             .list(link, family.into())
     }
 
+    pub fn addr_list_all(&mut self, family: AddrFamily) -> Result<Vec<Address>> {
+        self.sockets
+            .entry(libc::NETLINK_ROUTE)
+            .or_insert(SocketHandle::new(libc::NETLINK_ROUTE))
+            .handle_addr()
+            .list_all(family.into())
+    }
+
     pub fn addr_add(&mut self, link: &(impl Link + ?Sized), addr: &Address) -> Result<()> {
         self.addr_handle(AddrCmd::Add, link, addr)
     }

@@ -139,6 +139,18 @@ impl AddrHandle<'_> {
             })
             .collect())
     }
+
+    pub fn list_all(&mut self, family: i32) -> Result<Vec<Address>> {
+        let mut req = Message::new(libc::RTM_GETADDR, libc::NLM_F_DUMP);
+        let msg = AddressMessage::new(family);
+        req.add(&msg.serialize()?);
+
+        Ok(self
+            .request(&mut req, libc::RTM_NEWADDR)?
+            .iter()
+            .map(|m| Address::from(m.as_slice()))
+            .collect())
+    }
 }
 
 #[cfg(test)]
@@ -172,5 +184,39 @@ mod tests {
 
         assert_eq!(addrs.len(), 1);
         assert_eq!(addrs[0].ip, address);
+    }
+
+    #[test]
+    fn test_addr_list() {
+        let mut handle = super::SocketHandle::new(libc::NETLINK_ROUTE);
+        let mut link_handle = handle.handle_link();
+
+        let attr = LinkAttrs::new("lo");
+
+        let link = link_handle.get(&attr).unwrap();
+
+        let mut addr_handle = handle.handle_addr();
+
+        let addrs = addr_handle.list(&link, libc::AF_UNSPEC).unwrap();
+
+        for addr in &addrs {
+            println!("{addr:?}");
+        }
+
+        assert!(!addrs.is_empty());
+    }
+
+    #[test]
+    fn test_addr_list_all() {
+        let mut handle = super::SocketHandle::new(libc::NETLINK_ROUTE);
+        let mut addr_handle = handle.handle_addr();
+
+        let addrs = addr_handle.list_all(libc::AF_UNSPEC).unwrap();
+
+        for addr in &addrs {
+            println!("{addr:?}");
+        }
+
+        assert!(!addrs.is_empty());
     }
 }
