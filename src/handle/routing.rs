@@ -111,6 +111,22 @@ impl RouteHandle<'_> {
             attrs.push(RouteAttr::new(RTA_MTU, &b));
         }
 
+        if route.table > 0 {
+            msg.table = route.table;
+        }
+
+        if route.tos > 0 {
+            msg.tos = route.tos;
+        }
+
+        if route.protocol > 0 {
+            msg.protocol = route.protocol;
+        }
+
+        if route.rtm_type > 0 {
+            msg.route_type = route.rtm_type;
+        }
+
         // TODO: more attributes to be added
 
         msg.flags = route.flags;

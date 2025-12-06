@@ -1,29 +1,3 @@
-// // Rule represents a netlink rule.
-// type Rule struct {
-// 	Priority          int
-// 	Family            int
-// 	Table             int
-// 	Mark              uint32
-// 	Mask              *uint32
-// 	Tos               uint
-// 	TunID             uint
-// 	Goto              int
-// 	Src               *net.IPNet
-// 	Dst               *net.IPNet
-// 	Flow              int
-// 	IifName           string
-// 	OifName           string
-// 	SuppressIfgroup   int
-// 	SuppressPrefixlen int
-// 	Invert            bool
-// 	Dport             *RulePortRange
-// 	Sport             *RulePortRange
-// 	IPProto           int
-// 	UIDRange          *RuleUIDRange
-// 	Protocol          uint8
-// 	Type              uint8
-// }
-
 use derive_builder::Builder;
 use ipnet::IpNet;
 
@@ -62,7 +36,24 @@ impl Rule {
             flow: -1,
             suppress_ifgroup: -1,
             suppress_prefixlen: -1,
-            ..Default::default()
+
+            family: 0,
+            table: 0,
+            mark: 0,
+            mask: None,
+            tos: 0,
+            tun_id: 0,
+            src: None,
+            dst: None,
+            iif_name: String::new(),
+            oif_name: String::new(),
+            invert: false,
+            dport: None,
+            sport: None,
+            ip_proto: 0,
+            uid_range: None,
+            protocol: 0,
+            rule_type: 0,
         }
     }
 }
