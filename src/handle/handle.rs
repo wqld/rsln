@@ -1,6 +1,9 @@
 use anyhow::{bail, Result};
 
-use crate::core::{message::Message, socket::Socket};
+use crate::{
+    core::{message::Message, socket::Socket},
+    handle::rule::RuleHandle,
+};
 
 use super::{
     addr::AddrHandle, generic::GenericHandle, link::LinkHandle, neigh::NeighHandle,
@@ -41,6 +44,10 @@ impl SocketHandle {
 
     pub fn handle_route(&mut self) -> RouteHandle<'_> {
         RouteHandle::from(self)
+    }
+
+    pub fn handle_rule(&mut self) -> RuleHandle<'_> {
+        RuleHandle::from(self)
     }
 
     pub fn handle_neigh(&mut self) -> NeighHandle<'_> {

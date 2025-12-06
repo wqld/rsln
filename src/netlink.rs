@@ -11,6 +11,7 @@ use crate::{
         link::{Link, LinkAttrs},
         neigh::Neighbor,
         routing::{Routing, RtCmd},
+        rule::Rule,
         sock_diag::{InetDiagTcpResp, InetDiagUdpResp},
     },
 };
@@ -218,6 +219,26 @@ impl Netlink {
             .or_insert(SocketHandle::new(libc::NETLINK_ROUTE))
             .handle_route()
             .handle(route, proto, flags)
+    }
+
+    /// Adds a new rule.
+    /// Equivalent to: ip rule add
+    pub fn rule_add(&mut self, rule: &Rule) -> Result<()> {
+        self.sockets
+            .entry(libc::NETLINK_ROUTE)
+            .or_insert(SocketHandle::new(libc::NETLINK_ROUTE))
+            .handle_rule()
+            .add(rule)
+    }
+
+    /// Deletes an existing rule.
+    /// Equivalent to: ip rule del
+    pub fn rule_del(&mut self, rule: &Rule) -> Result<()> {
+        self.sockets
+            .entry(libc::NETLINK_ROUTE)
+            .or_insert(SocketHandle::new(libc::NETLINK_ROUTE))
+            .handle_rule()
+            .del(rule)
     }
 
     pub fn neigh_set(&mut self, neigh: &Neighbor) -> Result<()> {

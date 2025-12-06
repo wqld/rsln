@@ -4,6 +4,7 @@ pub mod handle;
 pub mod link;
 pub mod neigh;
 pub mod routing;
+pub mod rule;
 pub mod sock_diag;
 
 #[macro_export]

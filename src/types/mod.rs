@@ -9,6 +9,7 @@ pub mod link;
 pub mod message;
 pub mod neigh;
 pub mod routing;
+pub mod rule;
 pub mod sock_diag;
 
 pub const IFLA_VXLAN_UNSPEC: u16 = 0;
