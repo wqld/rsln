@@ -610,6 +610,7 @@ impl NeighborMessage {
 pub struct GenlMessage {
     pub command: u8,
     pub version: u8,
+    pub reserved: u16,
 }
 
 impl Attribute for GenlMessage {
@@ -627,6 +628,7 @@ impl GenlMessage {
         Self {
             command: GENL_CTRL_CMD_GETFAMILY,
             version: GENL_CTRL_VERSION,
+            reserved: 0,
         }
     }
 }

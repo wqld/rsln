@@ -391,4 +391,31 @@ mod tests {
         assert!(!links.is_empty());
         assert!(links.iter().any(|link| link.attrs().name == "lo"));
     }
+
+    #[test]
+    fn test_link_wireguard() {
+        test_setup!();
+        let mut handle = handle::SocketHandle::new(libc::NETLINK_ROUTE);
+        let mut link_handle = handle.handle_link();
+
+        let attr = LinkAttrs::new("wg_test_01");
+        let wg_link = Kind::Wireguard(attr.clone());
+
+        // Equivalent to: ip link add wg_test_01 type wireguard
+        link_handle
+            .add(
+                &wg_link,
+                libc::NLM_F_CREATE | libc::NLM_F_EXCL | libc::NLM_F_ACK,
+            )
+            .unwrap();
+
+        let link = link_handle.get(&attr).unwrap();
+        assert_eq!(link.attrs().name, "wg_test_01");
+        assert_eq!(link.attrs().link_type, "wireguard");
+
+        link_handle.delete(&link).unwrap();
+
+        let res = link_handle.get(&attr).err();
+        assert!(res.is_some());
+    }
 }

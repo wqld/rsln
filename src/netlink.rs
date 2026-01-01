@@ -354,4 +354,27 @@ mod tests {
         assert!(!tcpv4_diags.is_empty());
         assert_eq!(tcpv4_diags[0].msg.family, DiagFamily::V4 as u8);
     }
+
+    #[test]
+    fn test_wireguard_family_lookup() {
+        test_setup!();
+        let mut netlink = Netlink::new();
+
+        let wg_link = Kind::Wireguard(LinkAttrs::new("wg_genl_test"));
+        netlink
+            .link_add(&wg_link)
+            .expect("Failed to create wireguard interface");
+
+        let family = netlink
+            .genl_family_get("wireguard")
+            .expect("Failed to find WireGuard family. (Hint: Check GenlMessage padding?)");
+
+        assert_eq!(family.name, "wireguard");
+        assert!(
+            family.id > 0,
+            "Family ID should be a valid positive integer"
+        );
+        assert_eq!(family.version, 1, "WireGuard Genl version should be 1");
+        assert_eq!(family.max_attr, 8, "WireGuard max attributes should be 8");
+    }
 }
