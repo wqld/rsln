@@ -5,7 +5,7 @@ use std::{
     vec,
 };
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use bincode::deserialize;
 use serde::{Deserialize, Serialize};
 
@@ -42,6 +42,51 @@ pub trait Attribute {
     }
 }
 
+pub struct RouteAttrIter<'a> {
+    cursor: &'a [u8],
+}
+
+impl<'a> RouteAttrIter<'a> {
+    pub fn new(data: &'a [u8]) -> Self {
+        Self { cursor: data }
+    }
+}
+
+impl<'a> Iterator for RouteAttrIter<'a> {
+    type Item = Result<(u16, &'a [u8])>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.cursor.is_empty() {
+            return None;
+        }
+
+        if self.cursor.len() < RT_ATTR_HDR_SIZE {
+            return Some(Err(anyhow!("Truncated attribute header")));
+        }
+
+        let rta_len = u16::from_ne_bytes([self.cursor[0], self.cursor[1]]) as usize;
+        let rta_type = u16::from_ne_bytes([self.cursor[2], self.cursor[3]]);
+
+        if rta_len < RT_ATTR_HDR_SIZE {
+            return Some(Err(anyhow!("Invalid attribute lenth: {rta_len}")));
+        }
+        if rta_len > self.cursor.len() {
+            return Some(Err(anyhow!("Attribute length exceeds buffer")));
+        }
+
+        let payload = &self.cursor[RT_ATTR_HDR_SIZE..rta_len];
+        let aligned_len = align_of(rta_len, RTA_ALIGNTO);
+
+        if aligned_len <= self.cursor.len() {
+            self.cursor = &self.cursor[aligned_len..];
+        } else {
+            self.cursor = &[];
+        }
+
+        Some(Ok((rta_type, payload)))
+    }
+}
+
 pub struct RouteAttrMap<'a>(HashMap<u16, &'a [u8]>);
 
 impl<'a> From<&'a RouteAttrs> for RouteAttrMap<'a> {
@@ -62,7 +107,12 @@ impl<'a> Deref for RouteAttrMap<'a> {
     }
 }
 
-impl RouteAttrMap<'_> {
+impl<'a> RouteAttrMap<'a> {
+    pub fn parse(buf: &'a [u8]) -> Result<Self> {
+        let map = RouteAttrIter::new(buf).collect::<Result<HashMap<_, _>>>()?;
+        Ok(Self(map))
+    }
+
     pub fn get_bool(&self, key: &u16) -> Option<bool> {
         self.get(key).map(|v| v[0] == 1)
     }
@@ -144,6 +194,10 @@ impl RouteAttrs {
             .map(|attr| attr.serialize())
             .collect::<Result<Vec<_>, _>>()
             .map(|v| v.concat())
+    }
+
+    pub fn iter<'a>(buf: &'a [u8]) -> RouteAttrIter<'a> {
+        RouteAttrIter::new(buf)
     }
 }
 
@@ -624,6 +678,14 @@ impl Attribute for GenlMessage {
 }
 
 impl GenlMessage {
+    pub fn new(command: u8, version: u8) -> Self {
+        Self {
+            command,
+            version,
+            ..Default::default()
+        }
+    }
+
     pub fn get_family_message() -> Self {
         Self {
             command: GENL_CTRL_CMD_GETFAMILY,

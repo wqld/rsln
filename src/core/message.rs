@@ -92,8 +92,8 @@ impl Message {
             buf.extend(payload);
         }
 
-        let len = buf.len() as u16;
-        buf[..2].copy_from_slice(&len.to_ne_bytes());
+        let len = buf.len() as u32;
+        buf[..4].copy_from_slice(&len.to_ne_bytes());
 
         Ok(buf)
     }
